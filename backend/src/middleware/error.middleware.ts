@@ -5,6 +5,16 @@ interface AppError extends Error {
   statusCode?: number;
 }
 
+/**
+ * Global error handling middleware for Express. Catches all errors thrown in the application and formats a consistent JSON response.
+ * Logs the error details using the configured logger.
+ * In production, stack traces are omitted from the response for security reasons.
+ * @param err - The error object thrown in the application.
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param _next - The next middleware function (not used here).
+ * @returns A JSON response with success=false, error message, and optionally the stack trace.
+ */
 export const errorHandler = (
   err: unknown,
   req: Request,

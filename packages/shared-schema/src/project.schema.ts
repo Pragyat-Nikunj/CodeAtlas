@@ -5,7 +5,7 @@ const githubRepoRegex =
 
 export const ingestProjectSchema = z.object({
   githubUrl: z
-    .string()
+    .string({ error: 'GitHub URL is required' })
     .min(1, 'GitHub URL is required')
     .url()
     .refine(url => githubRepoRegex.test(url), {

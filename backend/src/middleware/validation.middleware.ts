@@ -3,6 +3,12 @@ import { ZodObject, ZodError } from 'zod';
 import logger from '../config/logger.js';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
+
+/**
+ * Creates a validation middleware for a given Zod schema.
+ * @param schema The Zod schema to validate against. Should be a ZodObject that defines the expected structure of req.body, req.query, and req.params.
+ * @returns The validation middleware function.
+ */
 const validate = (schema: ZodObject) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
