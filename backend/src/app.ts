@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import logger from './config/logger.js';
 import projectRoutes from './routes/project.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
-
+import { globalRateLimiter } from './middleware/rateLimit.middleware.js';
 dotenv.config();
 
 const app: Application = express();
@@ -12,6 +12,7 @@ const app: Application = express();
 // 1. Global Middleware
 app.use(cors());
 app.use(express.json());
+app.use(globalRateLimiter);
 
 // 2. Request Logging Middleware
 app.use((req: Request, _res: Response, next) => {
