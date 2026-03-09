@@ -13,6 +13,7 @@ export default [
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
+      '**/temp/**',
       '**/.next/**',
       'frontend/eslint.config.mjs',
       'packages/shared-schema/dist/**',
