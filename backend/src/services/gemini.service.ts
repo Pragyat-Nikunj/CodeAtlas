@@ -1,78 +1,114 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
+import { z } from 'zod';
 import logger from '../config/logger.js';
 
 dotenv.config();
 
-const API_KEY = process.env.GOOGLE_GENAI_API_KEY || '';
-
 /**
- * Service to handle all interactions with Gemini 3 models.
- * Includes built-in resilience, retries, and model orchestration.
+ * Service to handle interactions with Gemini.
+ * Uses native fetch for high-performance structured JSON generation.
  */
 export class GeminiService {
-  private static genAI = new GoogleGenerativeAI(API_KEY);
-
-  /**
-   * Models available in the Gemini 3 ecosystem.
-   * - Flash: Optimized for speed and high-volume file summaries.
-   * - Pro/Ultra: Optimized for complex architectural reasoning.
-   */
-  private static MODELS = {
-    FLASH: 'gemini-3.1-flash-lite-preview', 
-    PRO: 'gemini-3-flash-preview',
-  };
-
-  /**
-   * Executes a prompt with exponential backoff and error handling.
-   * @param prompt The string prompt to send to the AI
-   * @param usePro Whether to use the heavy-duty 'Pro' model (defaults to false/Flash)
-   */
-  static async generateText(prompt: string, usePro = false): Promise<string> {
-    if (!API_KEY) {
-      throw new Error('GOOGLE_GENAI_API_KEY is missing from environment variables.');
+  private static getApiKey(): string {
+    const key = process.env.GOOGLE_GENAI_API_KEY;
+    if (!key) {
+      throw new Error(
+        'GOOGLE_GENAI_API_KEY is missing from environment variables.'
+      );
     }
+    return key;
+  }
 
-    const modelName = usePro ? this.MODELS.PRO : this.MODELS.FLASH;
-    const model = this.genAI.getGenerativeModel({ model: modelName });
+  private static getBaseUrl(): string {
+    const modelName = 'gemini-3.1-flash-lite-preview';
+    return `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.getApiKey()}`;
+  }
+
+  /**
+   * Generates structured JSON output based on a prompt and a provided schema.
+   * Forces Gemini to return valid data and validates it with Zod for runtime safety.
+   * @param prompt - The instructions for the AI.
+   * @param geminiSchema - The JSON schema format required by the Gemini API for generation.
+   * @param zodSchema - The Zod schema used to validate and type-cast the response in the backend.
+   */
+  static async generateStructuredJson<T>(
+    prompt: string,
+    geminiSchema: object,
+    zodSchema: z.ZodType<T>
+  ): Promise<T> {
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: geminiSchema,
+      },
+    };
 
     return this.withRetry(async () => {
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const response = await fetch(this.getBaseUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `Gemini API Error: ${response.status} - ${JSON.stringify(errorData)}`
+        );
+      }
+
+      const result = await response.json();
+      const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!text) throw new Error('Gemini returned an empty response.');
-      return text;
+
+      try {
+        const rawJson = JSON.parse(text);
+
+        return zodSchema.parse(rawJson);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          logger.error(
+            `Gemini JSON validation failed: ${JSON.stringify(error.issues)}`
+          );
+          throw new Error(
+            'Gemini output did not match the expected application schema.'
+          );
+        }
+
+        logger.error(`Failed to parse Gemini JSON output: ${text}`);
+        throw new Error('Gemini returned invalid JSON formatting.');
+      }
     });
   }
 
   /**
-   * Internal wrapper to handle API resilience.
-   * Implements a simple retry mechanism for 429 (Rate Limit) or 500 errors.
+   * Internal wrapper for API resilience with exponential backoff (1s, 2s, 4s, 8s, 16s).
    */
-  private static async withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+  private static async withRetry<T>(
+    fn: () => Promise<T>,
+    retries = 5
+  ): Promise<T> {
     let lastError: unknown;
-    
     for (let i = 0; i < retries; i++) {
       try {
         return await fn();
       } catch (error: unknown) {
         lastError = error;
-        
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        
-        const isRateLimit = errorMessage.includes('429');
-        const delay = isRateLimit ? Math.pow(2, i) * 2000 : 1000;
+        const delay = Math.pow(2, i) * 1000;
 
         if (i < retries - 1) {
-          logger.warn(`Gemini API attempt ${i + 1} failed. Retrying in ${delay}ms...`);
-          await new Promise((res) => setTimeout(res, delay));
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          logger.warn(
+            `Gemini attempt ${i + 1} failed: ${errorMessage}. Retrying in ${delay}ms...`
+          );
+          await new Promise(res => setTimeout(res, delay));
         }
       }
     }
-
-    const finalErrorMessage = lastError instanceof Error ? lastError.message : String(lastError);
-    logger.error(`Gemini AI Service failed after ${retries} attempts: ${finalErrorMessage}`);
+    logger.error(`Gemini AI Service failed after ${retries} attempts.`);
     throw lastError;
   }
 }
