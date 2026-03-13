@@ -4,3 +4,4 @@ export * from './project.types.js';
 export * from './docs_node.types.js';
 export * from './sec_find.types.js';
 export * from './analysis.schema.js';
+export * from './security.schema.js';
