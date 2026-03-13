@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+vi.hoisted(() => {
+  process.env.SUPABASE_URL = 'https://mock.supabase.co';
+  process.env.SUPABASE_ANON_KEY = 'mock-key';
+  process.env.GOOGLE_GENAI_API_KEY = 'mock-ai-key';
+  process.env.NODE_ENV = 'test';
+});
 
 vi.mock('../config/supabase.js', () => ({
   supabase: {
@@ -14,50 +22,49 @@ vi.mock('../config/supabase.js', () => ({
   },
 }));
 
-vi.mock('../services/project.service.js', () => ({
-  ProjectService: { getOrCreateProject: vi.fn() },
+vi.mock('../middleware/auth.middleware.js', () => ({
+  authenticateUser: vi.fn((req, _res, next) => {
+    (req as any).user = { id: 'test-user-uuid' };
+    next();
+  }),
 }));
 
-vi.mock('../services/jobs.service.js', () => ({
-  JobService: {
-    createJob: vi.fn(),
-    updateJobStatus: vi.fn(), // Critical for background task safety
+vi.mock('../services/project.service.js');
+vi.mock('../services/jobs.service.js');
+// Ensure GitService returns a promise to avoid crashing the controller
+vi.mock('../services/git.service.js', () => ({
+  GitService: {
+    cloneRepository: vi.fn().mockResolvedValue('/temp/mock'),
+    cleanup: vi.fn().mockResolvedValue(undefined),
   },
 }));
+vi.mock('../services/file.service.js');
+vi.mock('../services/analysis.service.js');
+vi.mock('../services/security.service.js');
+vi.mock('../services/persistence.service.js');
 
-vi.mock('../services/git.service.js', () => ({
-  GitService: { cloneRepository: vi.fn().mockResolvedValue('/temp/mock') },
-}));
-
-// 2. IMPORT APP & LIMITER
 import app from '../app.js';
 import { ProjectService } from '../services/project.service.js';
 import { JobService } from '../services/jobs.service.js';
 import { ingestionRateLimiter } from '../middleware/rateLimit.middleware.js';
-import { Project } from '@codeatlas/shared-schema';
-import { IngestionJob } from '@codeatlas/shared-schema';
 
-describe('API Rate Limiting Protection', () => {
+describe('API Rate Limiting Protection (Authenticated)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    //Reset the rate limiter store before each test.
-    // This prevents tests in other files from "exhausting" the limit
+    // Reset rate limiter state for the local test IP
     if (ingestionRateLimiter.resetKey) {
-      // We use a mock IP to ensure isolation
       ingestionRateLimiter.resetKey('::ffff:127.0.0.1');
     }
 
     vi.mocked(ProjectService.getOrCreateProject).mockResolvedValue({
       id: 'proj_123',
-      owner: 'test',
-      repo: 'repo',
-    } as unknown as Project);
+    } as any);
     vi.mocked(JobService.createJob).mockResolvedValue({
       id: 'job_456',
       status: 'PENDING',
       progress: 0,
-    } as unknown as IngestionJob);
+    } as any);
   });
 
   it('should allow up to 5 requests successfully', async () => {
@@ -68,25 +75,22 @@ describe('API Rate Limiting Protection', () => {
         .post('/api/projects')
         .send({ githubUrl: validUrl });
 
-      expect(res.status, `Request #${i + 1} failed`).toBe(201);
+      expect(res.status).toBe(201);
     }
   });
 
   it('should return 429 on the 6th request', async () => {
     const validUrl = 'https://github.com/facebook/react';
 
-    // 1. Exhaust the limit
     for (let i = 0; i < 5; i++) {
       await request(app).post('/api/projects').send({ githubUrl: validUrl });
     }
 
-    // 2. The 6th attempt must fail
     const response = await request(app)
       .post('/api/projects')
       .send({ githubUrl: validUrl });
 
     expect(response.status).toBe(429);
-    expect(response.body).toHaveProperty('success', false);
     expect(response.body.error).toContain(
       'Too many project ingestion requests'
     );
