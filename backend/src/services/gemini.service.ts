@@ -25,6 +25,33 @@ export class GeminiService {
   }
 
   /**
+   * Generates a vector embedding for a chunk of text.
+   * Used for semantic search (Day 12/20).
+   */
+  static async generateEmbedding(text: string): Promise<number[]> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${this.getApiKey()}`;
+
+    const payload = {
+      model: 'models/text-embedding-004',
+      content: { parts: [{ text }] },
+    };
+
+    return this.withRetry(async () => {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok)
+        throw new Error(`Embedding API Error: ${response.status}`);
+
+      const result = await response.json();
+      return result.embedding.values;
+    });
+  }
+
+  /**
    * Generates structured JSON output based on a prompt and a provided schema.
    * Forces Gemini to return valid data and validates it with Zod for runtime safety.
    * @param prompt - The instructions for the AI.

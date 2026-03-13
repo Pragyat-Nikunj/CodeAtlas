@@ -12,6 +12,7 @@ export const securityFindingSchema = z.object({
   vulnerability: z.string(),
   description: z.string(),
   suggested_fix: z.string().nullable(),
+  embedding: z.array(z.number()).optional(),
 });
 
 /**

@@ -6,6 +6,7 @@ export interface DocumentationNode {
   parent_id?: string | null;
   title: string;
   content?: string | null;
+  embedding: number[] | null;
   type: NodeType;
   is_edited_by_admin: boolean;
   created_at: string;

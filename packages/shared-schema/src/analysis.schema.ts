@@ -15,6 +15,7 @@ export const pillarSchema = z.object({
 export const structuralManifestSchema = z.object({
   projectName: z.string(),
   highLevelSummary: z.string(),
+  quickStart: z.string(),
   pillars: z.array(pillarSchema),
 });
 

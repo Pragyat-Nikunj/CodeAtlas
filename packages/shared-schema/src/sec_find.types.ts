@@ -7,6 +7,7 @@ export interface SecurityFinding {
   file_path: string;
   line_number?: number | null;
   severity: FindingSeverity;
+  embedding: number[] | null;
   description: string;
   suggested_fix?: string | null;
   status: FindingStatus;
