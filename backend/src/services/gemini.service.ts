@@ -111,31 +111,41 @@ export class GeminiService {
   }
 
   /**
-   * Internal wrapper for API resilience with exponential backoff (1s, 2s, 4s, 8s, 16s).
+   * Professional Exponential Backoff Wrapper.
+   * Retries up to 5 times with delays: 1s, 2s, 4s, 8s, 16s.
    */
   private static async withRetry<T>(
     fn: () => Promise<T>,
     retries = 5
   ): Promise<T> {
     let lastError: unknown;
+
     for (let i = 0; i < retries; i++) {
       try {
         return await fn();
       } catch (error: unknown) {
         lastError = error;
-        const delay = Math.pow(2, i) * 1000;
 
+        const isAuthError =
+          error instanceof Error &&
+          (error.message.includes('401') || error.message.includes('403'));
+        const isValidationError = error instanceof z.ZodError;
+
+        if (isAuthError || isValidationError) {
+          throw error;
+        }
+
+        const delay = Math.pow(2, i) * 1000;
         if (i < retries - 1) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
           logger.warn(
-            `Gemini attempt ${i + 1} failed: ${errorMessage}. Retrying in ${delay}ms...`
+            `Gemini API busy or failed. Retry ${i + 1}/${retries} in ${delay}ms...`
           );
           await new Promise(res => setTimeout(res, delay));
         }
       }
     }
-    logger.error(`Gemini AI Service failed after ${retries} attempts.`);
+
+    logger.error(`Gemini Service exhausted all ${retries} retries.`);
     throw lastError;
   }
 }
