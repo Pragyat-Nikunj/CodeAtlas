@@ -44,7 +44,8 @@ export class PersistenceService {
         .select()
         .single();
 
-      if (rootError) throw rootError;
+      if (rootError)
+        throw new Error(`Failed to insert root node: ${rootError.message}`);
 
       const pillarNodes = await Promise.all(
         manifest.pillars.map(async (pillar: Pillar) => {
@@ -66,7 +67,10 @@ export class PersistenceService {
         .from('documentation_nodes')
         .insert(pillarNodes);
 
-      if (pillarError) throw pillarError;
+      if (pillarError)
+        throw new Error(
+          `Failed to insert pillar nodes: ${pillarError.message}`
+        );
 
       await supabase
         .from('projects')
@@ -118,7 +122,8 @@ export class PersistenceService {
         .from('security_findings')
         .insert(findingsWithEmbeddings);
 
-      if (error) throw error;
+      if (error)
+        throw new Error(`Failed to insert security findings: ${error.message}`);
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       logger.error(`PersistenceService.saveSecurityReport failed: ${msg}`);

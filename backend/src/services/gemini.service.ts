@@ -26,31 +26,49 @@ export class GeminiService {
 
   /**
    * Generates a vector embedding for a chunk of text.
-   * Used for semantic search (Day 12/20).
    */
   static async generateEmbedding(text: string): Promise<number[]> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${this.getApiKey()}`;
-
-    const payload = {
-      model: 'models/text-embedding-004',
-      content: { parts: [{ text }] },
-    };
+    const MODEL = 'gemini-embedding-001';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:embedContent`;
 
     return this.withRetry(async () => {
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': this.getApiKey(), // header-based auth (replaces ?key=)
+        },
+        body: JSON.stringify({
+          model: `models/${MODEL}`,
+          content: { parts: [{ text }] },
+        }),
       });
 
-      if (!response.ok)
-        throw new Error(`Embedding API Error: ${response.status}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+
+        if (response.status === 404) {
+          throw new Error(
+            `Gemini Embedding 404: Model not found or URL incorrect. ${JSON.stringify(err)}`
+          );
+        }
+
+        throw new Error(
+          `Gemini Embedding Error: ${response.status} ${JSON.stringify(err)}`
+        );
+      }
 
       const result = await response.json();
+
+      if (!result.embedding?.values) {
+        throw new Error(
+          `Malformed response from Gemini Embedding API ${JSON.stringify(result)}`
+        );
+      }
+
       return result.embedding.values;
     });
   }
-
   /**
    * Generates structured JSON output based on a prompt and a provided schema.
    * Forces Gemini to return valid data and validates it with Zod for runtime safety.

@@ -21,6 +21,7 @@ export class FileService {
     'typechain-types',
     'out',
     'broadcast',
+    '.svg',
     'lib',
     'coverage',
     'package-lock.json',

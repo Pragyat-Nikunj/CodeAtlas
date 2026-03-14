@@ -20,99 +20,28 @@ export class AnalysisService {
     logger.info(`Running Structural Scout for: ${repoName}`);
 
     const prompt = `
-      You are a senior Software Architect analyzing a code repository to understand its architecture.
+      Act as a Principal Software Architect and Product Strategist. You are analyzing the repository "${repoName}".
+      
+      Your goal is to perform a "Structural Scout" operation to translate a raw technical codebase into a high-level, human-readable architectural map.
 
-Your goal is to reconstruct the system architecture from the repository structure and file descriptions.
+      ### CORE TASKS:
+      1. **Identify the North Star:** Provide a concise, high-level summary of the project's primary business value and target problem space.
+      2. **Define 3-5 Domain Pillars:** Instead of technical folders (like 'utils' or 'controllers'), identify the "Functional Domains" of the system. 
+         - Examples: "Identity & Trust Perimeter", "Real-time Data Orchestration", "Predictive Analytics Engine".
+      3. **Strategic Summarization:** For each Pillar, provide a brief summary that explains *what* it does and *why* it is critical to the project.
+      4. **Automated Quick Start:** Based on the file structure (look for README, package.json, main files), generate a "Quick Start" guide. Include:
+         - Core prerequisites.
+         - The 3 most important commands to get the project running.
+      5. **Intelligent Mapping:** Map the provided files to these pillars. A file can belong to the most relevant pillar.
 
-Avoid vague or corporate-sounding categories like "Core", "Platform", or "Data Orchestration" unless they clearly exist in the code.
+      ### CONSTRAINTS:
+      - Use professional, architectural language.
+      - Avoid deep technical jargon in the descriptions; focus on functionality.
+      - If a file doesn't fit a major pillar, ignore it or group it into a secondary 'Infrastructure' pillar if absolutely necessary.
 
-Focus on identifying REAL architectural components and responsibilities.
-
---------------------------------------------------
-
-TASKS
-
-1. Identify the major architectural components of the system (3–7 components).
-   Components should represent meaningful runtime or logical parts of the system such as:
-   - API Layer
-   - Controllers / Routes
-   - Business Logic / Services
-   - AI or Processing Engines
-   - Data Access / Repositories
-   - Authentication / Identity
-   - Background Jobs / Workers
-   - Integrations with external services
-   - Shared utilities or infrastructure
-
-2. For each component provide:
-
-Component Name
-
-Responsibility  
-Explain what this component does in simple terms (2–3 sentences).
-
-Key Files / Folders  
-List the files or folders that belong to this component.
-
-Interactions  
-Describe what other components it communicates with.
-
-3. Identify the system layers if possible:
-   - Interface Layer (API / UI)
-   - Application Logic
-   - Data Layer
-   - External Integrations
-
-4. Describe the high-level request flow if the system exposes an API.
-Example:
-User Request → Route → Controller → Service → Database / External API → Response
-
-5. Provide a final high-level system summary explaining:
-   - What the system does
-   - The main capabilities
-   - The value it provides
-
---------------------------------------------------
-
-INPUT
-
-Repository Name: ${repoName}
-
-Repository Files and Descriptions:
-${fileData}
-
---------------------------------------------------
-
-OUTPUT FORMAT
-
-# System Overview
-Short explanation of what this project does.
-
-# Architecture Components
-
-## 1. <Component Name>
-Responsibility:
-Key Files:
-Interactions:
-
-## 2. <Component Name>
-Responsibility:
-Key Files:
-Interactions:
-
-...
-
-# System Layers
-Interface Layer:
-Application Layer:
-Data Layer:
-External Integrations:
-
-# Request / Data Flow
-Step-by-step explanation of how the system processes a request.
-
-# Architectural Summary
-How the components work together.
+      ### INPUT DATA:
+      Repository File List and Context:
+      ${fileData}
     `;
 
     try {
