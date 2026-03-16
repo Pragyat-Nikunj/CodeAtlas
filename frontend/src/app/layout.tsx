@@ -7,7 +7,8 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'CodeAtlas AI | Smart Documentation',
-  description: 'AI-driven architectural maps and security audits for your GitHub repositories.',
+  description:
+    'AI-driven architectural maps and security audits for your GitHub repositories.',
 };
 
 export default function RootLayout({
@@ -21,9 +22,7 @@ export default function RootLayout({
         <AuthProvider>
           <div className="flex min-h-screen flex-col bg-slate-800">
             <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
+            <main className="flex-1">{children}</main>
           </div>
         </AuthProvider>
       </body>

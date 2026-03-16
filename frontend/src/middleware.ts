@@ -45,7 +45,9 @@ export async function middleware(request: NextRequest) {
   );
 
   // 1. Refresh session if expired
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const url = request.nextUrl.clone();
 
@@ -64,7 +66,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Role check: We check the user_metadata or app_metadata 
+    // Role check: We check the user_metadata or app_metadata
     // populated by Supabase during sign-in/profile sync.
     const role = user.app_metadata?.role || user.user_metadata?.role;
 
