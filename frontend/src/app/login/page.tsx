@@ -1,33 +1,39 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { createClient } from "@/utils/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Mail, ArrowRight, Loader2 } from "lucide-react"
-import { FcGoogle } from "react-icons/fc"
+import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Mail, Loader2 } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 
-type Step = "idle" | "sent"
+type Step = 'idle' | 'sent';
 
 export default function LoginPage() {
   const supabase = createClient();
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [step, setStep] = useState<Step>("idle")
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [step, setStep] = useState<Step>('idle');
 
   // OTP Login — no full_name here since this is an existing user
   const handleEmailLogin = async () => {
     if (!email.trim()) {
-      setError("Please enter your email address.")
-      return
+      setError('Please enter your email address.');
+      return;
     }
 
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError('');
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -38,44 +44,40 @@ export default function LoginPage() {
         // Remove this line if you want login to also act as signup.
         shouldCreateUser: false,
       },
-    })
+    });
 
     if (error) {
-      setError(error.message)
+      setError(error.message);
     } else {
-      setStep("sent")
+      setStep('sent');
     }
 
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   // Google Login
   const handleGoogleLogin = async () => {
-    setLoading(true)
+    setLoading(true);
 
     await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider: 'google',
       options: {
         redirectTo: `${location.origin}/auth/callback`,
       },
-    })
-  }
+    });
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
       <Card className="w-full max-w-md bg-slate-900/60 border-slate-800 backdrop-blur-xl">
-
         <CardHeader>
-          <CardTitle className="text-white text-2xl">
-            Welcome back
-          </CardTitle>
+          <CardTitle className="text-white text-2xl">Welcome back</CardTitle>
           <CardDescription className="text-slate-400">
             Sign in to your account
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
-
-          {step === "idle" ? (
+          {step === 'idle' ? (
             <>
               {/* Email */}
               <div className="space-y-2">
@@ -84,8 +86,8 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleEmailLogin()}
+                  onChange={e => setEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleEmailLogin()}
                   className="bg-slate-950 border-slate-800 text-white placeholder:text-slate-600"
                 />
               </div>
@@ -104,7 +106,7 @@ export default function LoginPage() {
                 ) : (
                   <Mail className="mr-2 h-4 w-4" />
                 )}
-                {loading ? "Sending link…" : "Continue with Email"}
+                {loading ? 'Sending link…' : 'Continue with Email'}
               </Button>
 
               <div className="relative">
@@ -125,8 +127,11 @@ export default function LoginPage() {
               </Button>
 
               <p className="text-center text-sm text-slate-500">
-                Don&apos;t have an account?{" "}
-                <a href="/signup" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                Don&apos;t have an account?{' '}
+                <a
+                  href="/signup"
+                  className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
+                >
                   Sign up
                 </a>
               </p>
@@ -140,15 +145,16 @@ export default function LoginPage() {
               <div className="space-y-1">
                 <p className="text-white font-medium">Check your inbox</p>
                 <p className="text-slate-400 text-sm">
-                  We sent a login link to <span className="text-slate-200">{email}</span>
+                  We sent a login link to{' '}
+                  <span className="text-slate-200">{email}</span>
                 </p>
               </div>
               <p className="text-slate-500 text-xs">
-                Didn&apos;t get it?{" "}
+                Didn&apos;t get it?{' '}
                 <button
                   onClick={() => {
-                    setStep("idle")
-                    setError("")
+                    setStep('idle');
+                    setError('');
                   }}
                   className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
                 >
@@ -168,9 +174,8 @@ export default function LoginPage() {
               </Button>
             </div>
           )}
-
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

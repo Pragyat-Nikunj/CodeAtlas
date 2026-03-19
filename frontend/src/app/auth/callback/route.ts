@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard";
+  const code = requestUrl.searchParams.get('code');
 
   if (code) {
     const cookieStore = await cookies();
@@ -24,7 +23,7 @@ export async function GET(request: Request) {
                 cookieStore.set(name, value, options)
               );
             } catch (error) {
-              console.error("Cookie Setting Error:", error);
+              console.error('Cookie Setting Error:', error);
             }
           },
         },
@@ -33,15 +32,17 @@ export async function GET(request: Request) {
 
     // Capture the potential error
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    console.log("CALLBACK HIT");
-    
+
+    console.log('CALLBACK HIT');
+
     if (error) {
-      console.error("Exchange Code Error:", error.message);
-      return NextResponse.redirect(`${requestUrl.origin}/login?error=${encodeURIComponent(error.message)}`);
+      console.error('Exchange Code Error:', error.message);
+      return NextResponse.redirect(
+        `${requestUrl.origin}/login?error=${encodeURIComponent(error.message)}`
+      );
     }
   } else {
-      console.log("NO CODE FOUND IN URL");
+    console.log('NO CODE FOUND IN URL');
   }
 
   return NextResponse.redirect(`${requestUrl.origin}/dashboard`);

@@ -1,23 +1,23 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { useAuth } from "@/providers/AuthContext";
 
 export async function proxy(request: NextRequest) {
-
   let supabaseResponse = NextResponse.next({
     request,
   });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -27,18 +27,23 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  console.log("--- MIDDLEWARE DEBUG ---");
-  console.log("Cookies received:", request.cookies.getAll().map(c => c.name));
-  console.log("User:", user?.id || "null");
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  console.log('--- MIDDLEWARE DEBUG ---');
+  console.log(
+    'Cookies received:',
+    request.cookies.getAll().map(c => c.name)
+  );
+  console.log('User:', user?.id || 'null');
   if (error) {
-    console.error("Supabase Auth Error:", error.message);
+    console.error('Supabase Auth Error:', error.message);
   }
-  console.log("------------------------");
+  console.log('------------------------');
   const url = request.nextUrl.clone();
 
-  
   if (url.pathname.startsWith('/dashboard') && !user) {
     return NextResponse.redirect(new URL('/login', request.url));
   }

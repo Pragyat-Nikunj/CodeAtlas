@@ -1,7 +1,13 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from 'react';
 import { type User, type SupabaseClient } from '@supabase/supabase-js';
-import { createClient } from '@/utils/supabase/client'; 
+import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -23,7 +29,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
         if (error) throw error;
         setUser(user);
       } catch (error) {
@@ -52,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await supabase.auth.signOut();
       router.push('/login');
-      router.refresh(); 
+      router.refresh();
     } catch (error) {
       console.error('Error signing out:', error);
     }
