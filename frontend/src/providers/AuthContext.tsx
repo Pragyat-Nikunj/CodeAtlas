@@ -1,11 +1,8 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createClient, User, SupabaseClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { type User, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/client'; 
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -14,26 +11,24 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  supabase: supabase,
-  signOut: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const getUser = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        setUser(user);
       } catch (error) {
         console.error('Error fetching session:', error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -51,11 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh(); 
     } catch (error) {
       console.error('Error signing out:', error);
     }
