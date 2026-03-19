@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/utils/supabase/client';
@@ -23,31 +23,6 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        const user = session.user;
-
-        const name =
-          user.user_metadata?.full_name || user.user_metadata?.name || null;
-
-        const { error } = await supabase
-          .from('profiles')
-          .upsert(
-            { id: user.id, email: user.email!, full_name: name },
-            { onConflict: 'id', ignoreDuplicates: false }
-          );
-
-        if (error) {
-          console.error('[SignupPage] profiles upsert failed:', error.message);
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
 
   // OTP Login
   const handleEmailLogin = async () => {

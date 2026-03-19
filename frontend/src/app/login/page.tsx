@@ -25,7 +25,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [step, setStep] = useState<Step>('idle');
 
-  // OTP Login — no full_name here since this is an existing user
   const handleEmailLogin = async () => {
     if (!email.trim()) {
       setError('Please enter your email address.');
