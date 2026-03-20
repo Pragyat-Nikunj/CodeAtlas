@@ -63,21 +63,53 @@ export const ingestProject = asyncHandler(
 );
 
 /**
+ * GET /api/projects
+ * Fetch all projects (for dashboard)
+ */
+export const getAllProjects = asyncHandler(
+  async (req: Request, res: Response) => {
+    const search = req.query.search as string | undefined;
+
+    let query = supabase
+      .from('projects')
+      .select(`*, ingestion_jobs!inner (status)`)
+      .eq('ingestion_jobs.status', 'COMPLETED')
+      .order('created_at', { ascending: false });
+
+    if (search?.trim()) {
+      query = query.or(`repo.ilike.%${search}%,owner.ilike.%${search}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    const projects = data.map(({ ingestion_jobs, ...project }) => project);
+
+    res.json({ success: true, data: projects });
+  }
+);
+
+/**
  * GET /api/projects/:id
  * Fetches the high-level metadata for a project.
  */
-export const getProject = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', id)
-    .single();
+export const getProjectById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error || !data)
-    return res.status(404).json({ error: 'Project not found' });
-  res.json({ success: true, data });
-});
+    if (error || !data)
+      return res.status(404).json({ error: 'Project not found' });
+    res.json({ success: true, data });
+  }
+);
 
 /**
  * GET /api/projects/:id/nodes

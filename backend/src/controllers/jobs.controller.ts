@@ -20,6 +20,7 @@ export const getJobStatus = asyncHandler(
       data: {
         status: job.status,
         progress: job.progress,
+        projectId: job.project_id,
         error: job.error_message,
       },
     });

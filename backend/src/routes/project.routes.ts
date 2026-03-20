@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import {
   ingestProject,
-  getProject,
+  getProjectById,
+  getAllProjects,
   getProjectNodes,
   getProjectSecurity,
 } from '../controllers/project.controller.js';
@@ -13,7 +14,8 @@ import { authenticateUser } from '../middleware/auth.middleware.js';
 const router = Router();
 
 // Publicly viewable documentation (No auth required for reading)
-router.get('/:id', getProject);
+router.get('/', getAllProjects);
+router.get('/:id', getProjectById);
 router.get('/:id/nodes', getProjectNodes);
 router.get('/:id/security', getProjectSecurity);
 
