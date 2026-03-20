@@ -85,7 +85,7 @@ export const getAllProjects = asyncHandler(
     if (error) {
       return res.status(500).json({ success: false, error: error.message });
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const projects = data.map(({ ingestion_jobs, ...project }) => project);
 
     res.json({ success: true, data: projects });

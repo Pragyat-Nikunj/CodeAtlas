@@ -49,12 +49,13 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-6 py-12 space-y-8">
-
         {/* Header */}
         <div className="flex items-end justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-            <p className="text-slate-500 text-sm mt-1">Welcome back, {firstName}</p>
+            <p className="text-slate-500 text-sm mt-1">
+              Welcome back, {firstName}
+            </p>
           </div>
           <CreateProjectDialog />
         </div>
@@ -69,7 +70,10 @@ export default function DashboardPage() {
         {state === 'loading' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-[88px] rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse" />
+              <div
+                key={i}
+                className="h-[88px] rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse"
+              />
             ))}
           </div>
         )}
@@ -79,7 +83,9 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 py-16 text-center gap-3">
             <AlertTriangle className="h-6 w-6 text-red-400" />
             <div>
-              <p className="text-slate-200 font-medium">Failed to load projects</p>
+              <p className="text-slate-200 font-medium">
+                Failed to load projects
+              </p>
               <p className="text-slate-500 text-sm mt-0.5">{errorMsg}</p>
             </div>
             <Button
@@ -102,7 +108,9 @@ export default function DashboardPage() {
               {query ? `No results for "${query}"` : 'No projects yet'}
             </p>
             <p className="text-slate-600 text-sm">
-              {query ? 'Try a different search term.' : 'Add a GitHub repo to get started.'}
+              {query
+                ? 'Try a different search term.'
+                : 'Add a GitHub repo to get started.'}
             </p>
           </div>
         )}
@@ -115,7 +123,6 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-
       </div>
     </div>
   );
