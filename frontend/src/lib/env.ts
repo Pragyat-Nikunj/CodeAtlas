@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const env = {
+  geminiApiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
   apiUrl: process.env.NEXT_PUBLIC_URI!,
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

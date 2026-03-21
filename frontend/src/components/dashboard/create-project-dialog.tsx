@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import env from '@/lib/env';
+import { createClient } from '@/utils/supabase/client';
 
 export default function CreateProjectDialog() {
   const [url, setUrl] = useState('');
@@ -40,10 +41,37 @@ export default function CreateProjectDialog() {
     setLoading(true);
 
     try {
-      console.log(`${env.apiUrl}`);
+      // ── Pre-flight: verify repo exists on GitHub ──────────────────────
+      const match = url.trim().match(/github\.com\/([^/]+)\/([^/]+)/);
+      if (match) {
+        const [, owner, repo] = match;
+        const ghRes = await fetch(
+          `https://api.github.com/repos/${owner}/${repo.replace('.git', '')}`
+        );
+        if (ghRes.status === 404) {
+          setError("This GitHub repository doesn't exist or is private.");
+          setLoading(false);
+          return;
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────
+
+      const supabase = createClient();
+      const { data: authData } = await supabase.auth.getSession();
+      const session = authData.session;
+
+      if (!session) {
+        setError('You must be logged in to add a project.');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`${env.apiUrl}/api/projects`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ githubUrl: url.trim() }),
       });
 
@@ -63,7 +91,7 @@ export default function CreateProjectDialog() {
         return;
       }
 
-      router.push(`/dashboard/jobs/${data.data.jobId}`);
+      router.push(`/dashboard/projects/${data.data.projectId}`);
     } catch (err) {
       setError('Network error — check your connection and try again.');
       console.error('Error creating project:', err);

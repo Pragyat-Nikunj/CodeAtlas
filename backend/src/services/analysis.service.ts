@@ -19,30 +19,36 @@ export class AnalysisService {
   ): Promise<StructuralManifest> {
     logger.info(`Running Structural Scout for: ${repoName}`);
 
-    const prompt = `
-      Act as a Principal Software Architect and Product Strategist. You are analyzing the repository "${repoName}".
-      
-      Your goal is to perform a "Structural Scout" operation to translate a raw technical codebase into a high-level, human-readable architectural map.
+    const prompt = `Act as a Principal Software Architect and Technical Writer. You are performing a deep architectural analysis of the repository "${repoName}".
 
-      ### CORE TASKS:
-      1. **Identify the North Star:** Provide a concise, high-level summary of the project's primary business value and target problem space.
-      2. **Define 3-5 Domain Pillars:** Instead of technical folders (like 'utils' or 'controllers'), identify the "Functional Domains" of the system. 
-         - Examples: "Identity & Trust Perimeter", "Real-time Data Orchestration", "Predictive Analytics Engine".
-      3. **Strategic Summarization:** For each Pillar, provide a brief summary that explains *what* it does and *why* it is critical to the project.
-      4. **Automated Quick Start:** Based on the file structure (look for README, package.json, main files), generate a "Quick Start" guide. Include:
-         - Core prerequisites.
-         - The 3 most important commands to get the project running.
-      5. **Intelligent Mapping:** Map the provided files to these pillars. A file can belong to the most relevant pillar.
+Your goal is to produce a comprehensive, human-readable architectural map that would impress both technical recruiters and senior engineers.
 
-      ### CONSTRAINTS:
-      - Use professional, architectural language.
-      - Avoid deep technical jargon in the descriptions; focus on functionality.
-      - If a file doesn't fit a major pillar, ignore it or group it into a secondary 'Infrastructure' pillar if absolutely necessary.
+### CORE TASKS:
 
-      ### INPUT DATA:
-      Repository File List and Context:
-      ${fileData}
-    `;
+1. **Project Summary:** Write 3-4 sentences describing the project's purpose, business value, target problem, and what makes it technically interesting.
+
+2. **Quick Start Guide:** Based on README, package.json, and entry files, generate a practical quick start. Include prerequisites, environment setup, and the exact commands to run the project.
+
+3. **Define 4-6 Domain Pillars:** Identify the core functional domains of the system. Name them evocatively (e.g. "Identity & Trust Perimeter", "Real-time Data Orchestration"). For EACH pillar write:
+   - A detailed 4-6 sentence description explaining:
+     * What this domain is responsible for
+     * How it works internally (key patterns, technologies used)
+     * Why it is critical to the overall system
+     * What would break if this pillar didn't exist
+     * How it connects or depends on other pillars
+   - List the specific files that belong to this pillar
+
+4. **File Mapping:** Map every meaningful file to its most relevant pillar. Ignore config boilerplate unless architecturally significant.
+
+### QUALITY BAR:
+- Each pillar description must be at least 4 sentences. One-sentence descriptions are NOT acceptable.
+- Use confident, architectural language — write as if presenting to a CTO.
+- Mention specific technologies, patterns, and design decisions you observe in the code.
+- Make it clear WHY each architectural decision matters, not just what it does.
+
+### INPUT DATA:
+Repository File List and Context:
+${fileData}`;
 
     try {
       return await GeminiService.generateStructuredJson<StructuralManifest>(
