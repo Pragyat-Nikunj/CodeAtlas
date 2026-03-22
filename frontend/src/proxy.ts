@@ -32,20 +32,24 @@ export async function proxy(request: NextRequest) {
     error,
   } = await supabase.auth.getUser();
 
-  console.log('--- MIDDLEWARE DEBUG ---');
-  console.log(
-    'Cookies received:',
-    request.cookies.getAll().map(c => c.name)
-  );
-  console.log('User:', user?.id || 'null');
   if (error) {
     console.error('Supabase Auth Error:', error.message);
   }
-  console.log('------------------------');
   const url = request.nextUrl.clone();
 
   if (url.pathname.startsWith('/dashboard') && !user) {
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+  if (url.pathname === '/dashboard' && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role === 'SUPERADMIN') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
   }
 
   if (url.pathname.startsWith('/admin')) {
@@ -58,7 +62,6 @@ export async function proxy(request: NextRequest) {
       .select('role')
       .eq('id', user.id)
       .single();
-
     if (profile?.role !== 'SUPERADMIN') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }

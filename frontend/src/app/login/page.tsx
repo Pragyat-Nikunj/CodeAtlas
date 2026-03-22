@@ -37,10 +37,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        // Must match the same redirect as signup
         emailRedirectTo: `${location.origin}/auth/callback`,
-        // shouldCreateUser: false prevents new signups via the login page.
-        // Remove this line if you want login to also act as signup.
         shouldCreateUser: false,
       },
     });
