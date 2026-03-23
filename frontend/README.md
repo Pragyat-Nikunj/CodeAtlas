@@ -1,15 +1,3 @@
-<div align="center">
-
-<img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" />
-<img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-<img src="https://img.shields.io/badge/Supabase-SSR-3ECF8E?style=flat-square&logo=supabase&logoColor=white" />
-<img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-<img src="https://img.shields.io/badge/shadcn%2Fui-latest-white?style=flat-square" />
-<img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" />
-
-<br />
-<br />
-
 # CodeAtlas AI — Frontend
 
 **The web client for CodeAtlas AI. Explore AI-generated documentation, security findings, and architectural insights for any GitHub repository.**
@@ -32,7 +20,7 @@ Authentication is handled entirely through **Supabase Auth** (magic link + Googl
 
 | Technology | Purpose |
 |---|---|
-| [Next.js 15](https://nextjs.org) | React framework, App Router, Server Components |
+| [Next.js 16](https://nextjs.org) | React framework, App Router, Server Components |
 | [TypeScript](https://www.typescriptlang.org) | Type safety across the entire codebase |
 | [Supabase SSR](https://supabase.com/docs/guides/auth/server-side) | Auth session management, database client |
 | [shadcn/ui](https://ui.shadcn.com) | Accessible, composable UI component library |

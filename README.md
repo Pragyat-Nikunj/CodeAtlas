@@ -394,4 +394,4 @@ Built with enthusiasm using:
 
 ---
 
-**Made with ❤️ by the CodeAtlas team**
+**Made with ❤️ by the Pragyat Nikunj**
