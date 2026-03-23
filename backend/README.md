@@ -26,16 +26,16 @@ src/
 
 ## Key Services
 
-| Service | Purpose |
-|---------|---------|
-| **ProjectService** | Project metadata and lifecycle |
-| **JobService** | Job state machine and progress tracking |
-| **GitService** | Repository cloning and cleanup |
-| **FileService** | Code scanning and context assembly |
-| **AnalysisService** | Architectural analysis via Gemini |
-| **SecurityService** | Vulnerability scanning |
-| **GeminiService** | Gemini API with retry logic |
-| **PersistenceService** | Save and embed data |
+| Service                | Purpose                                 |
+| ---------------------- | --------------------------------------- |
+| **ProjectService**     | Project metadata and lifecycle          |
+| **JobService**         | Job state machine and progress tracking |
+| **GitService**         | Repository cloning and cleanup          |
+| **FileService**        | Code scanning and context assembly      |
+| **AnalysisService**    | Architectural analysis via Gemini       |
+| **SecurityService**    | Vulnerability scanning                  |
+| **GeminiService**      | Gemini API with retry logic             |
+| **PersistenceService** | Save and embed data                     |
 
 ## Quick Start
 
@@ -66,6 +66,7 @@ PORT=5000
 ## API Endpoints
 
 ### Projects
+
 - `GET /api/projects` — List all projects
 - `GET /api/projects/:id` — Get project details
 - `GET /api/projects/:id/nodes` — Get documentation tree
@@ -73,6 +74,7 @@ PORT=5000
 - `POST /api/projects` — Ingest repository (auth required)
 
 ### Jobs
+
 - `GET /api/jobs/:id` — Poll job status
 
 **Rate Limiting:** 5 ingestion requests per 15 minutes; 100 global requests per minute
@@ -126,6 +128,7 @@ Tests include services, controllers, middleware, and integration scenarios with 
 ## Logging
 
 Winston logger outputs to:
+
 - `logs/error.log` — Errors only
 - `logs/combined.log` — All levels
 - Console (development only)
@@ -133,9 +136,10 @@ Winston logger outputs to:
 ## Database
 
 Supabase PostgreSQL with tables:
+
 - `projects` — Repository metadata
 - `ingestion_jobs` — Job tracking
-- `documentation_nodes` — Pillars & summaries  
+- `documentation_nodes` — Pillars & summaries
 - `security_findings` — Vulnerabilities
 
 ## Performance Notes
@@ -149,11 +153,12 @@ Supabase PostgreSQL with tables:
 ## Error Handling
 
 All errors return consistent JSON:
+
 ```json
 {
   "success": false,
   "error": "Descriptive message",
-  "stack": null  // Production only
+  "stack": null // Production only
 }
 ```
 

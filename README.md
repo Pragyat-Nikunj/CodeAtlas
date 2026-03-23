@@ -32,34 +32,38 @@ CodeAtlas is a full-stack application that transforms GitHub repositories into i
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Pragyat-Nikunj/CodeAtlas
    cd CodeAtlas
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
-   
+
    Create `.env.local` in the workspace root:
+
    ```env
    # Supabase Configuration
    SUPABASE_URL=your_supabase_url
    SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   
+
    # Google Gemini API
    GOOGLE_GENAI_API_KEY=your_gemini_api_key
-   
+
    # Application
    NODE_ENV=development
    LOG_LEVEL=info
    ```
 
 4. **Set up database**
+
    ```bash
    # Run migrations (from backend directory)
    cd backend
@@ -67,10 +71,11 @@ CodeAtlas is a full-stack application that transforms GitHub repositories into i
    ```
 
 5. **Start development servers**
+
    ```bash
    # From root directory
    npm run dev
-   
+
    # This starts both frontend and backend concurrently
    ```
 
@@ -113,19 +118,19 @@ CodeAtlas/
 
 ### Projects
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/projects` | List all analyzed projects | ❌ |
-| `GET` | `/api/projects/:id` | Get project metadata | ❌ |
-| `GET` | `/api/projects/:id/nodes` | Get documentation tree | ❌ |
-| `GET` | `/api/projects/:id/security` | Get security findings | ❌ |
-| `POST` | `/api/projects` | Ingest new repository | ✅ |
+| Method | Endpoint                     | Description                | Auth |
+| ------ | ---------------------------- | -------------------------- | ---- |
+| `GET`  | `/api/projects`              | List all analyzed projects | ❌   |
+| `GET`  | `/api/projects/:id`          | Get project metadata       | ❌   |
+| `GET`  | `/api/projects/:id/nodes`    | Get documentation tree     | ❌   |
+| `GET`  | `/api/projects/:id/security` | Get security findings      | ❌   |
+| `POST` | `/api/projects`              | Ingest new repository      | ✅   |
 
 ### Jobs
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/jobs/:id` | Poll job status and progress | ❌ |
+| Method | Endpoint        | Description                  | Auth |
+| ------ | --------------- | ---------------------------- | ---- |
+| `GET`  | `/api/jobs/:id` | Poll job status and progress | ❌   |
 
 **Authentication:** Bearer token in `Authorization` header required for protected endpoints.
 
@@ -145,6 +150,7 @@ curl -X POST http://localhost:5000/api/projects \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -173,16 +179,16 @@ The application processes repositories through a multi-stage pipeline:
 
 ### Key Services
 
-| Service | Purpose |
-|---------|---------|
-| **ProjectService** | Project lifecycle and metadata management |
-| **JobService** | Job state machine and progress tracking |
-| **GitService** | Repository cloning and file management |
-| **FileService** | High-performance code scanning and context assembly |
-| **AnalysisService** | Structural and architectural analysis via Gemini |
-| **SecurityService** | Vulnerability detection and OWASP mapping |
-| **GeminiService** | Gemini API integration with retry logic |
-| **PersistenceService** | Data persistence and embedding generation |
+| Service                | Purpose                                             |
+| ---------------------- | --------------------------------------------------- |
+| **ProjectService**     | Project lifecycle and metadata management           |
+| **JobService**         | Job state machine and progress tracking             |
+| **GitService**         | Repository cloning and file management              |
+| **FileService**        | High-performance code scanning and context assembly |
+| **AnalysisService**    | Structural and architectural analysis via Gemini    |
+| **SecurityService**    | Vulnerability detection and OWASP mapping           |
+| **GeminiService**      | Gemini API integration with retry logic             |
+| **PersistenceService** | Data persistence and embedding generation           |
 
 ### Database Schema (Simplified)
 
@@ -214,6 +220,7 @@ npm run test:coverage
 ```
 
 Test coverage includes:
+
 - Unit tests for all services
 - Integration tests for API endpoints
 - Middleware tests (auth, rate limiting, validation)
@@ -247,15 +254,15 @@ cd backend && npm run start      # Backend on port 5000
 
 ## 🛠️ Development Commands
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start both servers in development mode |
-| `npm run dev:frontend` | Frontend only |
-| `npm run dev:backend` | Backend only |
-| `npm run lint` | Check code style |
-| `npm run format` | Auto-format code |
-| `npm run test` | Run tests once |
-| `npm run test:watch` | Run tests in watch mode |
+| Command                | Purpose                                |
+| ---------------------- | -------------------------------------- |
+| `npm run dev`          | Start both servers in development mode |
+| `npm run dev:frontend` | Frontend only                          |
+| `npm run dev:backend`  | Backend only                           |
+| `npm run lint`         | Check code style                       |
+| `npm run format`       | Auto-format code                       |
+| `npm run test`         | Run tests once                         |
+| `npm run test:watch`   | Run tests in watch mode                |
 
 ## 📖 API Documentation
 
@@ -275,7 +282,7 @@ RateLimit-Reset: 1640000000
 {
   "success": false,
   "error": "Descriptive error message",
-  "stack": null  // Only in development
+  "stack": null // Only in development
 }
 ```
 
@@ -316,6 +323,7 @@ Track progress with `/api/jobs/:id`:
 ## 🎓 Tech Stack
 
 ### Backend
+
 - **Runtime:** Node.js (TypeScript)
 - **Framework:** Express.js
 - **Database:** Supabase (PostgreSQL)
@@ -325,12 +333,14 @@ Track progress with `/api/jobs/:id`:
 - **Testing:** Vitest
 
 ### Frontend
+
 - **Framework:** Next.js 16
 - **UI:** React 19 + Tailwind CSS + shadcn/ui
 - **Visualization:** Three.js
 - **Authentication:** Supabase Auth
 
 ### DevOps
+
 - **Package Manager:** npm (monorepo)
 - **Linting:** ESLint
 - **Formatting:** Prettier
@@ -352,7 +362,6 @@ GOOGLE_GENAI_API_KEY=AIzaSy...
 # Server
 NODE_ENV=development|production|test
 PORT=5000
-LOG_LEVEL=info|debug|error|warn
 
 # Rate Limiting
 INGESTION_RATE_LIMIT_WINDOW_MS=900000
@@ -378,15 +387,16 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 4. Open a Pull Request
 
 Please ensure:
+
 - Tests pass (`npm run test`)
 - Code is formatted (`npm run format`)
 - Linting passes (`npm run lint`)
 - Types check (`npm run build`)
 
-
 ## 🎉 Acknowledgments
 
 Built with enthusiasm using:
+
 - Google Gemini for AI analysis
 - Supabase for seamless backend infrastructure
 - Next.js for exceptional developer experience

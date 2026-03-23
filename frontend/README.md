@@ -18,15 +18,15 @@ Authentication is handled entirely through **Supabase Auth** (magic link + Googl
 
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| [Next.js 16](https://nextjs.org) | React framework, App Router, Server Components |
-| [TypeScript](https://www.typescriptlang.org) | Type safety across the entire codebase |
-| [Supabase SSR](https://supabase.com/docs/guides/auth/server-side) | Auth session management, database client |
-| [shadcn/ui](https://ui.shadcn.com) | Accessible, composable UI component library |
-| [Tailwind CSS v4](https://tailwindcss.com) | Utility-first styling |
-| [Lucide React](https://lucide.dev) | Icon system |
-| [`@codeatlas/shared-schema`](../packages/shared-schema) | Shared Zod schemas and TypeScript types |
+| Technology                                                        | Purpose                                        |
+| ----------------------------------------------------------------- | ---------------------------------------------- |
+| [Next.js 16](https://nextjs.org)                                  | React framework, App Router, Server Components |
+| [TypeScript](https://www.typescriptlang.org)                      | Type safety across the entire codebase         |
+| [Supabase SSR](https://supabase.com/docs/guides/auth/server-side) | Auth session management, database client       |
+| [shadcn/ui](https://ui.shadcn.com)                                | Accessible, composable UI component library    |
+| [Tailwind CSS v4](https://tailwindcss.com)                        | Utility-first styling                          |
+| [Lucide React](https://lucide.dev)                                | Icon system                                    |
+| [`@codeatlas/shared-schema`](../packages/shared-schema)           | Shared Zod schemas and TypeScript types        |
 
 ---
 
@@ -111,7 +111,7 @@ frontend/
 │   │   ├── projects/
 │   │       └── [id]/
 │   │           └── page.tsx      # Individual project documentation view
-│   │   
+│   │
 │   ├── admin/
 │   │   └── page.tsx              # SUPERADMIN control panel
 │   └── layout.tsx                # Root layout with providers
@@ -149,38 +149,49 @@ frontend/
 ## Pages & Features
 
 ### `/` — Landing Page
+
 Public-facing homepage introducing the platform.
 
 ### `/explore` — Explore
+
 Browse all publicly indexed repositories without requiring authentication. Features:
+
 - Live client-side search by repo name, owner, or description
 - Repository cards with visibility badges, owner info, and creation date
 - Skeleton loading states and empty/error fallbacks
 - Direct links to individual project documentation
 
 ### `/login` — Sign In
+
 - **Magic link** authentication via Supabase OTP
 - **Google OAuth** single sign-on
 - Handles `shouldCreateUser: false` to prevent unauthorized signups via the login page
 
 ### `/signup` — Sign Up
+
 - Magic link + Google OAuth registration
 - Passes `full_name` metadata to Supabase on account creation
 
 ### `/dashboard` — User Dashboard
+
 Protected route. Requires an authenticated session.
+
 - Lists all ingested projects (public + user-created)
 - **Create Project dialog** — accepts a GitHub URL, validates format, triggers backend ingestion, and redirects to the job tracker
 - Loading skeleton, error retry, and empty state handling
 
 ### `/dashboard/projects/[id]` — Project View
+
 Displays the full AI-generated documentation tree for a repository, including:
+
 - Structural pillars and summaries
 - File-level documentation nodes
 - Security findings panel
 
 ### `/admin` — Admin Dashboard
+
 **SUPERADMIN only.** Redirected to automatically from `/dashboard` if the authenticated user holds the `SUPERADMIN` role. Features:
+
 - **Stats grid** — total users, projects, open security findings, active jobs
 - **Users table** — all registered users with role badges and delete functionality (with confirmation dialog)
 - **Projects table** — all ingested repositories with creator attribution
@@ -216,22 +227,22 @@ Otherwise → allow through
 
 All route protection is enforced in `middleware.ts` via `proxy.ts`:
 
-| Route | Rule |
-|---|---|
-| `/dashboard/*` | Requires authenticated session. Redirects to `/login` if unauthenticated. |
-| `/dashboard` (exact) | If `role === SUPERADMIN`, bounces to `/admin`. |
-| `/admin/*` | Requires authenticated session **and** `role === SUPERADMIN`. Non-admins are redirected to `/dashboard`. |
-| `/explore`, `/login`, `/signup` | Fully public. |
+| Route                           | Rule                                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `/dashboard/*`                  | Requires authenticated session. Redirects to `/login` if unauthenticated.                                |
+| `/dashboard` (exact)            | If `role === SUPERADMIN`, bounces to `/admin`.                                                           |
+| `/admin/*`                      | Requires authenticated session **and** `role === SUPERADMIN`. Non-admins are redirected to `/dashboard`. |
+| `/explore`, `/login`, `/signup` | Fully public.                                                                                            |
 
 ### Role System
 
 Roles are stored in the `public.profiles` table in Supabase and enforced via **Row Level Security (RLS)** policies.
 
-| Role | Access |
-|---|---|
-| `VIEWER` | Can view public projects and their own profile |
-| `PROJECTADMIN` | Extended project management capabilities |
-| `SUPERADMIN` | Full access to the admin dashboard and all data |
+| Role           | Access                                          |
+| -------------- | ----------------------------------------------- |
+| `VIEWER`       | Can view public projects and their own profile  |
+| `PROJECTADMIN` | Extended project management capabilities        |
+| `SUPERADMIN`   | Full access to the admin dashboard and all data |
 
 > [!NOTE]
 > RLS policies use a `get_user_role(user_id UUID)` security definer function to avoid infinite recursion when policies on `profiles` reference the same table.
@@ -249,7 +260,11 @@ All base UI components (`Button`, `Card`, `Input`, `Dialog`, `Table`, `Badge`, `
 Types and Zod schemas are imported from the `@codeatlas/shared-schema` workspace package. This ensures the frontend and backend stay in sync on data shapes:
 
 ```ts
-import { Project, IngestionJob, SecurityFinding } from '@codeatlas/shared-schema';
+import {
+  Project,
+  IngestionJob,
+  SecurityFinding,
+} from '@codeatlas/shared-schema';
 ```
 
 ### Auth Context
@@ -276,6 +291,7 @@ npm run build        # Production build
 The frontend expects the following tables to exist in your Supabase project. Refer to the Database Schema in the backend docs for the full SQL.
 
 Required tables:
+
 - `public.profiles`
 - `public.projects`
 - `public.ingestion_jobs`
